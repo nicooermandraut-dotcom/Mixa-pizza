@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIXA - Pizzas Personalizadas a tu Gusto | Coronel Suárez</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mixa: {
+                            orange: '#F97316',
+                            red: '#DC2626',
+                            yellow: '#F59E0B',
+                            dark: '#121212',
+                            card: '#1E1E1E',
+                            light: '#F8FAFC',
+                            accent: '#EA580C'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Oswald', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #121212; color: #F8FAFC; }
+        h1, h2, h3, .font-display { font-family: 'Oswald', sans-serif; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #121212; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+
+        .glass-panel {
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .pizza-visualizer {
+            background: radial-gradient(circle, #3a2212 0%, #1a0f08 100%);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+        }
+
+        .crust-ring {
+            border: 12px solid #c87a32;
+            box-shadow: 0 0 20px rgba(200, 122, 50, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-mixa-dark text-slate-100 min-h-screen flex flex-col">
+
+    <nav class="fixed top-0 left-0 w-full z-40 glass-panel border-b border-white/10 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <!-- Brand Logo -->
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 bg-gradient-to-tr from-mixa-red to-mixa-orange rounded-xl flex items-center justify-center font-display text-2xl font-bold text-white shadow-lg shadow-mixa-orange/20 transform group-hover:rotate-6 transition-transform">
+                        M
+                    </div>
+                    <div>
+                        <span class="text-3xl font-extrabold font-display tracking-wider text-white">MIXA<span class="text-mixa-orange">.</span></span>
+                        <span class="block text-[10px] uppercase tracking-widest text-slate-400 font-semibold -mt-1">Pizzas a tu medida</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Nav Links -->
+                <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                    <a href="#armar" class="text-slate-200 hover:text-mixa-orange transition flex items-center gap-2">
+                        <i class="fa-solid fa-pizza-slice text-mixa-orange"></i> Armá tu Pizza
+                    </a>
+                    <a href="#carta" class="text-slate-200 hover:text-mixa-orange transition">Carta Clásica</a>
+                    <a href="#nosotros" class="text-slate-200 hover:text-mixa-orange transition">Sobre MIXA</a>
+                    <a href="#contacto" class="text-slate-200 hover:text-mixa-orange transition">Contacto</a>
+                </div>
+
+                <!-- Action Buttons: Admin & Cart -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleAdminModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-2 border border-slate-700 transition" title="Administrar Toppings y Menú">
+                        <i class="fa-solid fa-gear text-mixa-yellow"></i>
+                        <span class="hidden sm:inline">Panel Admin</span>
+                    </button>
+
+                    <button onclick="toggleCartDrawer()" class="relative bg-gradient-to-r from-mixa-orange to-mixa-red hover:from-orange-600 hover:to-red-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-mixa-orange/20 transition transform active:scale-95">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="hidden sm:inline">Mi Pedido</span>
+                        <span id="cart-badge" class="bg-white text-mixa-red font-bold text-xs px-2 py-0.5 rounded-full min-w-[20px] text-center">0</span>
+                    </button>
+
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="md:hidden text-slate-300 hover:text-white p-2">
+                        <i class="fa-solid fa-bars text-xl" id="mobile-menu-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-mixa-card border-b border-slate-800 px-4 pt-2 pb-6 space-y-3">
+            <a href="#armar" onclick="toggleMobileMenu()" class="block py-2 text-slate-200 hover:text-mixa-orange font-medium">🍕 Armá tu Pizza</a>
+            <a href="#carta" onclick="toggleMobileMenu()" class="block py-2 text-slate-200 hover:text-mixa-orange font-medium">📋 Carta Clásica</a>
+            <a href="#nosotros" onclick="toggleMobileMenu()" class="block py-2 text-slate-200 hover:text-mixa-orange font-medium">ℹ️ Sobre MIXA</a>
+            <a href="#contacto" onclick="toggleMobileMenu()" class="block py-2 text-slate-200 hover:text-mixa-orange font-medium">📍 Contacto</a>
+        </div>
+    </nav>
+
+    <header class="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-mixa-orange/20 via-transparent to-transparent pointer-events-none"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-left space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-mixa-orange/10 border border-mixa-orange/30 text-mixa-orange text-xs font-semibold uppercase tracking-wider">
+                        <i class="fa-solid fa-location-dot"></i> Mitre 940, Coronel Suárez
+                    </div>
+                    <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-tight uppercase">
+                        Vos elegís los <span class="text-transparent bg-clip-text bg-gradient-to-r from-mixa-orange via-mixa-yellow to-mixa-red">toppings</span>. Nosotros la magia.
+                    </h1>
+                    <p class="text-slate-300 text-lg md:text-xl max-w-xl mx-auto lg:mx-0 leading-relaxed font-light">
+                        Creamos la primera pizzería 100% personalizable de la ciudad. Combiná tus ingredientes favoritos sobre nuestra masa madre artesanal con 48hs de fermentación.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                        <a href="#armar" class="w-full sm:w-auto bg-gradient-to-r from-mixa-orange to-mixa-red hover:from-orange-600 hover:to-red-700 text-white font-bold px-8 py-4 rounded-xl text-lg shadow-xl shadow-mixa-orange/25 transition transform hover:-translate-y-0.5 text-center flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Armar mi Pizza Ahora
+                        </a>
+                        <a href="#carta" class="w-full sm:w-auto bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 font-semibold px-8 py-4 rounded-xl text-lg transition text-center">
+                            Ver Carta Fija
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Visual Banner Highlight -->
+                <div class="relative flex justify-center">
+                    <div class="w-72 h-72 sm:w-96 sm:h-96 rounded-full bg-gradient-to-tr from-mixa-orange to-mixa-yellow opacity-20 blur-3xl absolute -z-10 animate-pulse"></div>
+                    <div class="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl glass-panel p-6 max-w-md w-full text-center space-y-4">
+                        <div class="text-xs uppercase tracking-widest text-mixa-yellow font-bold">Experiencia MIXA</div>
+                        <h3 class="text-2xl font-bold text-white">¿Cómo querés tu pizza hoy?</h3>
+                        <div class="grid grid-cols-3 gap-3 pt-2 text-left">
+                            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                                <span class="text-xs font-bold text-slate-400 block">1. Masa</span>
+                                <span class="text-sm font-semibold text-white">48hs Leudado</span>
+                            </div>
+                            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                                <span class="text-xs font-bold text-slate-400 block">2. Toppings</span>
+                                <span class="text-sm font-semibold text-mixa-orange">A tu Gusto</span>
+                            </div>
+                            <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
+                                <span class="text-xs font-bold text-slate-400 block">3. Entrega</span>
+                                <span class="text-sm font-semibold text-white">Delivery Rápido</span>
+                            </div>
+                        </div>
+                        <div class="pt-2 text-xs text-slate-400 border-t border-slate-800 flex items-center justify-between">
+                            <span><i class="fa-solid fa-clock text-mixa-orange mr-1"></i> Mié-Dom 20:00 a 00:00 hs</span>
+                            <span class="text-mixa-yellow font-semibold">Coronel Suárez</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="armar" class="py-20 bg-slate-950/80 border-y border-slate-800 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-mixa-orange text-sm font-bold tracking-widest uppercase"><i class="fa-solid fa-sliders"></i> Creador Interactivo</span>
+                <h2 class="text-4xl sm:text-5xl font-bold text-white uppercase">Armá tu Pizza MIXA</h2>
+                <p class="text-slate-400">Seleccioná el tamaño, tipo de masa, salsas y agregá los toppings por categoría. El precio se calcula automáticamente en tiempo real.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left Column: Pizza Customizer Form Controls -->
+                <div class="lg:col-span-7 space-y-8">
+                    
+                    <!-- Step 1: Tamaño y Masa -->
+                    <div class="bg-mixa-card p-6 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-3 border-b border-slate-800 pb-3">
+                            <span class="w-7 h-7 rounded-full bg-mixa-orange text-white text-xs flex items-center justify-center font-bold">1</span>
+                            Elegí Tamaño y Masa
+                        </h3>
+
+                        <!-- Tamaños -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Tamaño de Pizza</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="size-options-container">
+                                <!-- JavaScript renderize size options -->
+                            </div>
+                        </div>
+
+                        <!-- Tipo de Masa -->
+                        <div class="pt-2">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Estilo de Masa</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="dough-options-container">
+                                <!-- JavaScript renderize dough options -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Salsas y Quesos Base -->
+                    <div class="bg-mixa-card p-6 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-3 border-b border-slate-800 pb-3">
+                            <span class="w-7 h-7 rounded-full bg-mixa-orange text-white text-xs flex items-center justify-center font-bold">2</span>
+                            Base: Salsa y Queso
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Salsa Base</label>
+                                <select id="sauce-select" onchange="updatePizzaBuilder()" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 text-sm focus:border-mixa-orange outline-none">
+                                    <!-- Rendered by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Queso Base</label>
+                                <select id="cheese-select" onchange="updatePizzaBuilder()" class="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-3 text-sm focus:border-mixa-orange outline-none">
+                                    <!-- Rendered by JS -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Toppings por Categorías (Económicos, Intermedios, Premium) -->
+                    <div class="bg-mixa-card p-6 rounded-2xl border border-slate-800 space-y-6">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 class="text-lg font-bold text-white flex items-center gap-3">
+                                <span class="w-7 h-7 rounded-full bg-mixa-orange text-white text-xs flex items-center justify-center font-bold">3</span>
+                                Elegí tus Toppings
+                            </h3>
+                            <span class="text-xs text-slate-400">Podés combinar varias opciones</span>
+                        </div>
+
+                        <!-- Toppings Tabs -->
+                        <div class="flex border-b border-slate-800 gap-4 text-sm font-semibold">
+                            <button onclick="switchToppingCategory('Económico')" id="tab-eco" class="pb-2 border-b-2 border-mixa-orange text-mixa-orange">
+                                Económicos
+                            </button>
+                            <button onclick="switchToppingCategory('Intermedio')" id="tab-inter" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-white">
+                                Intermedios
+                            </button>
+                            <button onclick="switchToppingCategory('Premium')" id="tab-prem" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-white">
+                                Premium ⭐
+                            </button>
+                        </div>
+
+                        <!-- Toppings Selector Container -->
+                        <div id="toppings-selector-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[160px]">
+                            <!-- JavaScript populates toppings here dynamically based on selected tab -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Interactive Visual Preview & Real-Time Price Summary -->
+                <div class="lg:col-span-5 sticky top-28 space-y-6">
+                    <div class="bg-mixa-card p-6 rounded-2xl border border-slate-800 shadow-2xl space-y-6">
+                        
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 class="text-xl font-bold text-white uppercase tracking-wider">Tu Pizza MIXA</h3>
+                            <button onclick="resetCustomBuilder()" class="text-xs text-slate-400 hover:text-mixa-red transition flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-left"></i> Reiniciar
+                            </button>
+                        </div>
+
+                        <!-- Interactive Canvas / Visualizer -->
+                        <div class="pizza-visualizer w-full h-64 rounded-2xl relative flex items-center justify-center overflow-hidden border border-slate-800">
+                            <!-- Pizza Crust Base Visual -->
+                            <div class="crust-ring w-48 h-48 rounded-full bg-yellow-600/30 flex items-center justify-center relative transition-transform duration-500 hover:scale-105">
+                                <div id="visual-sauce" class="w-40 h-40 rounded-full bg-red-700/60 flex items-center justify-center transition-all">
+                                    <div id="visual-cheese" class="w-36 h-36 rounded-full bg-amber-100/70 flex items-center justify-center p-2 text-center text-xs font-bold text-amber-950 flex-wrap gap-1 content-center overflow-hidden">
+                                        <!-- Active toppings badges inside visualizer -->
+                                        <span id="visual-toppings-placeholder" class="text-slate-800/60 text-[10px] uppercase font-bold">Agregá Toppings</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Config Breakdown list -->
+                        <div class="space-y-2 text-xs border-b border-slate-800 pb-4">
+                            <div class="flex justify-between text-slate-300">
+                                <span>Tamaño & Masa:</span>
+                                <span id="summary-size-dough" class="font-semibold text-white">Mediana - Tradicional</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Base (Salsa & Queso):</span>
+                                <span id="summary-base" class="font-semibold text-white">Salsa Tomate + Mozzarella</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block mb-1">Toppings Seleccionados (<span id="summary-topping-count">0</span>):</span>
+                                <div id="summary-toppings-tags" class="flex flex-wrap gap-1.5 min-h-[30px]">
+                                    <span class="text-slate-500 italic">Ningún topping agregado</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Breakdown -->
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <span class="text-xs text-slate-400 uppercase tracking-wider block">Precio Calculado</span>
+                                <span id="summary-total-price" class="text-3xl font-extrabold text-mixa-orange font-display">$8.500</span>
+                            </div>
+                            <button onclick="addCustomPizzaToCart()" class="bg-gradient-to-r from-mixa-orange to-mixa-red hover:from-orange-600 hover:to-red-700 text-white font-bold px-6 py-3 rounded-xl text-sm shadow-lg shadow-mixa-orange/20 transition transform active:scale-95 flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Agregar al Pedido
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="carta" class="py-20 bg-mixa-dark relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 space-y-3">
+                <span class="text-mixa-yellow text-sm font-bold tracking-widest uppercase"><i class="fa-solid fa-utensils"></i> Menú de la Casa</span>
+                <h2 class="text-4xl sm:text-5xl font-bold text-white uppercase">Nuestra Carta Clásica</h2>
+                <p class="text-slate-400">Si preferís ir a lo seguro, elegí una de nuestras recetas clásicas preparadas con ingredientes seleccionados.</p>
+            </div>
+
+            <!-- Categories Filter -->
+            <div class="flex justify-center gap-3 mb-10 flex-wrap" id="menu-category-filters">
+                <button onclick="filterMenuCategory('Todos')" class="menu-cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-mixa-orange text-white border border-mixa-orange transition">
+                    Todas
+                </button>
+                <button onclick="filterMenuCategory('Base Clásica')" class="menu-cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+                    Base Clásica
+                </button>
+                <button onclick="filterMenuCategory('Caballo de Batalla')" class="menu-cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition">
+                    Especiales
+                </button>
+            </div>
+
+            <!-- Fixed Pizzas Grid -->
+            <div id="fixed-menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- JavaScript populates menu items dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <section id="nosotros" class="py-20 bg-slate-950 border-t border-slate-800 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <span class="text-mixa-orange text-xs font-bold tracking-widest uppercase">Proyecto Emprendedor</span>
+                    <h2 class="text-4xl font-bold text-white uppercase leading-tight">De la Universidad a tu Mesa</h2>
+                    <p class="text-slate-300 leading-relaxed font-light">
+                        <strong class="text-white">MIXA</strong> nació como el proyecto final para la carrera de <span class="text-mixa-yellow font-semibold">Técnico Superior en Administración Contable</span> del <span class="text-white">I.S.F.D. y T. Nº 48</span> de Coronel Suárez, desarrollado por Ayelen Baez y Nicolás Ermandraut.
+                    </p>
+                    <p class="text-slate-300 leading-relaxed font-light">
+                        Detectamos que la oferta gastronómica local no ofrecía una alternativa real de personalización con delivery ágil. Por eso creamos un modelo sustentado en una <strong class="text-white">Pirámide de Productos</strong>: pizzas tradicionales de calidad en la base, nuestras especialidades caballo de batalla en el centro, y como diferencial único, la pizza 100% armada por el cliente.
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4 text-center">
+                        <div class="bg-mixa-card p-4 rounded-xl border border-slate-800">
+                            <span class="text-2xl font-extrabold text-mixa-orange font-display block">48 Hs</span>
+                            <span class="text-xs text-slate-400 uppercase">Fermentación Lenta</span>
+                        </div>
+                        <div class="bg-mixa-card p-4 rounded-xl border border-slate-800">
+                            <span class="text-2xl font-extrabold text-mixa-yellow font-display block">100%</span>
+                            <span class="text-xs text-slate-400 uppercase">Personalizable</span>
+                        </div>
+                        <div class="bg-mixa-card p-4 rounded-xl border border-slate-800">
+                            <span class="text-2xl font-extrabold text-mixa-red font-display block">Local</span>
+                            <span class="text-xs text-slate-400 uppercase">Mitre 940</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="glass-panel p-8 rounded-3xl border border-slate-800 space-y-6">
+                        <div class="flex items-center gap-4 border-b border-slate-800 pb-4">
+                            <div class="w-12 h-12 rounded-full bg-mixa-orange/20 text-mixa-orange flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-lg">Proyecto de Inversión MIXA</h4>
+                                <p class="text-xs text-slate-400">Práctica Profesional I - Lic. Andrea Gallo</p>
+                            </div>
+                        </div>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-mixa-orange"></i>
+                                <span>Habilitación Comercial y Bromatológica Municipal</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-mixa-orange"></i>
+                                <span>Insumos clasificados por categorías de costo</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-mixa-orange"></i>
+                                <span>Delivery en empaque térmico especial</span>
+                            </li>
+                            <li class="flex items-center gap-3">
+                                <i class="fa-solid fa-check text-mixa-orange"></i>
+                                <span>Atención online y presencial</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contacto" class="py-20 bg-mixa-dark relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12 space-y-3">
+                <span class="text-mixa-orange text-sm font-bold tracking-widest uppercase"><i class="fa-solid fa-map-pin"></i> Encontranos</span>
+                <h2 class="text-4xl font-bold text-white uppercase">Ubicación y Horarios</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-mixa-card p-8 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="w-12 h-12 bg-mixa-orange/10 text-mixa-orange rounded-xl flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-store"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Local Comercial</h3>
+                    <p class="text-slate-400 text-sm">Mitre 940, Coronel Suárez<br>Provincia de Buenos Aires</p>
+                </div>
+
+                <div class="bg-mixa-card p-8 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="w-12 h-12 bg-mixa-yellow/10 text-mixa-yellow rounded-xl flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Horarios de Atención</h3>
+                    <p class="text-slate-400 text-sm">
+                        Lunes a Viernes: 10:00 - 14:00 y 20:00 - 23:30 hs<br>
+                        Sábados y Domingos: 20:00 - 00:00 hs
+                    </p>
+                </div>
+
+                <div class="bg-mixa-card p-8 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="w-12 h-12 bg-mixa-red/10 text-mixa-red rounded-xl flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-truck-ram"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Pedidos y Delivery</h3>
+                    <p class="text-slate-400 text-sm">Delivery rápido o Retiro en Local<br>WhatsApp Directo</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-8 text-center text-xs text-slate-500">
+        <p>© 2026 MIXA Pizzas - Coronel Suárez. Proyecto Integrador de Administración Contable.</p>
+    </footer>
+
+    <!-- CART DRAWER -->
+    <div id="cart-drawer" class="fixed inset-0 z-50 overflow-hidden hidden transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="toggleCartDrawer()"></div>
+        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+            <div class="w-screen max-w-md bg-mixa-card border-l border-slate-800 text-slate-100 flex flex-col justify-between shadow-2xl">
+                
+                <!-- Drawer Header -->
+                <div class="p-6 border-b border-slate-800 flex items-center justify-between">
+                    <h3 class="text-xl font-bold font-display text-white flex items-center gap-2">
+                        <i class="fa-solid fa-cart-shopping text-mixa-orange"></i> Tu Pedido MIXA
+                    </h3>
+                    <button onclick="toggleCartDrawer()" class="text-slate-400 hover:text-white p-2">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Drawer Content / Items list -->
+                <div id="cart-items-container" class="p-6 overflow-y-auto flex-1 space-y-4">
+                    <!-- JavaScript populates items -->
+                </div>
+
+                <!-- Cart Checkout Form & Total -->
+                <div class="p-6 border-t border-slate-800 bg-slate-900/80 space-y-4">
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Nombre Completo</label>
+                            <input type="text" id="order-name" placeholder="Tu nombre" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white outline-none focus:border-mixa-orange">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block font-semibold text-slate-400 mb-1">Modalidad</label>
+                                <select id="order-type" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white outline-none focus:border-mixa-orange">
+                                    <option value="Delivery">Delivery Domicilio</option>
+                                    <option value="Retiro">Retiro en Mitre 940</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-semibold text-slate-400 mb-1">Pago</label>
+                                <select id="order-payment" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white outline-none focus:border-mixa-orange">
+                                    <option value="Efectivo">Efectivo</option>
+                                    <option value="Transferencia">Transferencia MP</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Dirección en Coronel Suárez</label>
+                            <input type="text" id="order-address" placeholder="Ej: Av. Casey 450" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-white outline-none focus:border-mixa-orange">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-800 flex items-center justify-between">
+                        <span class="text-sm text-slate-400 uppercase font-semibold">Total a Pagar:</span>
+                        <span id="cart-total-price" class="text-2xl font-extrabold text-mixa-orange font-display">$0</span>
+                    </div>
+
+                    <button onclick="sendWhatsAppOrder()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl text-center shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Confirmar Pedido por WhatsApp
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN MODAL (GESTIONAR TOPPINGS Y MENÚ EN CUALQUIER MOMENTO) -->
+    <div id="admin-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+        <div class="min-h-screen px-4 flex items-center justify-center">
+            <div class="fixed inset-0 bg-black/80 backdrop-blur-sm" onclick="toggleAdminModal()"></div>
+
+            <div class="bg-mixa-card border border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-8 relative z-10 shadow-2xl space-y-6 my-8">
+                
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <h3 class="text-2xl font-bold font-display text-white flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-mixa-yellow"></i> Panel Gestor de Menú & Toppings
+                        </h3>
+                        <p class="text-xs text-slate-400">Agregá o modificá precios, toppings y alternativas de pizza en tiempo real.</p>
+                    </div>
+                    <button onclick="toggleAdminModal()" class="text-slate-400 hover:text-white p-2">
+                        <i class="fa-solid fa-xmark text-2xl"></i>
+                    </button>
+                </div>
+
+                <!-- Admin Tabs -->
+                <div class="flex border-b border-slate-800 gap-6 text-sm font-semibold">
+                    <button onclick="switchAdminTab('toppings')" id="admin-tab-toppings" class="pb-3 border-b-2 border-mixa-orange text-mixa-orange">
+                        <i class="fa-solid fa-cheese"></i> Gestor de Toppings
+                    </button>
+                    <button onclick="switchAdminTab('menu')" id="admin-tab-menu" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-pizza-slice"></i> Gestor de Carta Fija
+                    </button>
+                </div>
+
+                <!-- TAB CONTENT 1: TOPPINGS MANAGER -->
+                <div id="admin-sec-toppings" class="space-y-6">
+                    
+                    <!-- Form to Add Topping -->
+                    <form onsubmit="handleAddOrEditTopping(event)" class="bg-slate-900 p-4 rounded-xl border border-slate-800 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Nombre Topping</label>
+                            <input type="text" id="topping-input-name" required placeholder="Ej: Rúcula Fresca" class="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none focus:border-mixa-orange">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Precio ($)</label>
+                            <input type="number" id="topping-input-price" required placeholder="Ej: 1200" min="0" class="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none focus:border-mixa-orange">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Categoría</label>
+                            <select id="topping-input-category" class="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none focus:border-mixa-orange">
+                                <option value="Económico">Económico</option>
+                                <option value="Intermedio">Intermedio</option>
+                                <option value="Premium">Premium ⭐</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button type="submit" class="w-full bg-mixa-orange hover:bg-orange-600 text-white font-bold p-2 rounded-lg text-xs transition">
+                                <i class="fa-solid fa-plus"></i> Guardar Topping
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Toppings List Table -->
+                    <div class="max-h-60 overflow-y-auto border border-slate-800 rounded-xl">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 uppercase text-[10px] text-slate-400 sticky top-0">
+                                <tr>
+                                    <th class="p-3">Topping</th>
+                                    <th class="p-3">Categoría</th>
+                                    <th class="p-3">Precio</th>
+                                    <th class="p-3 text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-toppings-table-body" class="divide-y divide-slate-800">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB CONTENT 2: FIXED MENU MANAGER -->
+                <div id="admin-sec-menu" class="space-y-6 hidden">
+                    
+                    <!-- Form to Add Pizza -->
+                    <form onsubmit="handleAddOrEditPizza(event)" class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Nombre Pizza</label>
+                                <input type="text" id="pizza-input-name" required placeholder="Ej: Napolitana con Ajo" class="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Precio ($)</label>
+                                <input type="number" id="pizza-input-price" required placeholder="Ej: 9500" min="0" class="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-400 mb-1">Categoría</label>
+                                <select id="pizza-input-category" class="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none">
+                                    <option value="Base Clásica">Base Clásica</option>
+                                    <option value="Caballo de Batalla">Caballo de Batalla</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">Descripción de Ingredientes</label>
+                            <input type="text" id="pizza-input-desc" required placeholder="Ej: Mozzarella, rodajas de tomate, ajo frito y albahaca fresca" class="w-full bg-slate-950 border border-slate-800 text-white rounded-lg p-2 text-xs outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-mixa-orange hover:bg-orange-600 text-white font-bold p-2.5 rounded-lg text-xs transition">
+                            <i class="fa-solid fa-plus"></i> Guardar Pizza en la Carta
+                        </button>
+                    </form>
+
+                    <!-- Menu List Table -->
+                    <div class="max-h-60 overflow-y-auto border border-slate-800 rounded-xl">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 uppercase text-[10px] text-slate-400 sticky top-0">
+                                <tr>
+                                    <th class="p-3">Nombre</th>
+                                    <th class="p-3">Categoría</th>
+                                    <th class="p-3">Precio</th>
+                                    <th class="p-3 text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-menu-table-body" class="divide-y divide-slate-800">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Reset button & Close -->
+                <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-xs">
+                    <button onclick="resetDataToDefault()" class="text-red-400 hover:text-red-300 flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-trash-arrow-up"></i> Restablecer datos de fábrica
+                    </button>
+                    <button onclick="toggleAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-4 py-2 rounded-lg">
+                        Cerrar Panel
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        
+        // Default Configuration & Starting Data
+        const DEFAULT_STATE = {
+            sizes: [
+                { id: 'chica', name: 'Chica (4 porc.)', basePrice: 6000 },
+                { id: 'mediana', name: 'Mediana (8 porc.)', basePrice: 8500 },
+                { id: 'grande', name: 'Grande (10 porc.)', basePrice: 11000 },
+                { id: 'familiar', name: 'Familiar (12 porc.)', basePrice: 13500 }
+            ],
+            doughs: [
+                { id: 'tradicional', name: 'Masa Tradicional', extraPrice: 0 },
+                { id: 'masamadre', name: 'Masa Madre (48hs)', extraPrice: 800 },
+                { id: 'sintacc', name: 'Sin TACC', extraPrice: 1200 }
+            ],
+            sauces: [
+                { id: 'tomate', name: 'Salsa Tomate Casera', price: 0 },
+                { id: 'blanca', name: 'Salsa Blanca Cítrica', price: 400 },
+                { id: 'pesto', name: 'Pesto de Albahaca', price: 600 }
+            ],
+            cheeses: [
+                { id: 'mozzarella', name: 'Mozzarella Abundante', price: 0 },
+                { id: 'doble-moz', name: 'Doble Mozzarella', price: 1200 },
+                { id: 'cuatro-quesos', name: 'Base 4 Quesos', price: 1800 }
+            ],
+            toppings: [
+                // Económicos
+                { id: 't1', name: 'Aceitunas Verdes', price: 500, category: 'Económico' },
+                { id: 't2', name: 'Cebolla Morada', price: 500, category: 'Económico' },
+                { id: 't3', name: 'Morrones Asados', price: 600, category: 'Económico' },
+                { id: 't4', name: 'Orégano & Ajo', price: 300, category: 'Económico' },
+                // Intermedios
+                { id: 't5', name: 'Jamón Cocido', price: 1000, category: 'Intermedio' },
+                { id: 't6', name: 'Pepperoni Premium', price: 1200, category: 'Intermedio' },
+                { id: 't7', name: 'Huevo Duro Picado', price: 700, category: 'Intermedio' },
+                { id: 't8', name: 'Champiñones Frescos', price: 1200, category: 'Intermedio' },
+                // Premium
+                { id: 't9', name: 'Jamón Crudo Serrano', price: 1800, category: 'Premium' },
+                { id: 't10', name: 'Queso Azul / Roquefort', price: 1600, category: 'Premium' },
+                { id: 't11', name: 'Rúcula Fresca', price: 1200, category: 'Premium' },
+                { id: 't12', name: 'Mozzarella de Búfala', price: 2000, category: 'Premium' }
+            ],
+            fixedMenu: [
+                {
+                    id: 'pm1',
+                    name: 'Muzzarella Clásica',
+                    category: 'Base Clásica',
+                    desc: 'Salsa de tomate casera, mozzarella abundante, orégano y aceitunas verdes.',
+                    price: 8500,
+                    image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80'
+                },
+                {
+                    id: 'pm2',
+                    name: 'Especial MIXA',
+                    category: 'Caballo de Batalla',
+                    desc: 'Masa madre, salsa casera, mozzarella, jamón cocido, morrones asados y huevo duro.',
+                    price: 11500,
+                    image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=600&q=80'
+                },
+                {
+                    id: 'pm3',
+                    name: 'Roquefort & Nuez',
+                    category: 'Caballo de Batalla',
+                    desc: 'Queso azul intenso, mozzarella fundida, nueces tostadas y toque de miel.',
+                    price: 12800,
+                    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80'
+                },
+                {
+                    id: 'pm4',
+                    name: 'Pepperoni Supreme',
+                    category: 'Caballo de Batalla',
+                    desc: 'Doble porción de mozzarella y generosas rodajas de pepperoni tostado.',
+                    price: 12000,
+                    image: 'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=600&q=80'
+                }
+            ]
+        };
+
+        // App Active State
+        let appData = loadState();
+        let currentToppingTab = 'Económico';
+        let currentMenuFilter = 'Todos';
+
+        // Custom Pizza Builder State
+        let selectedSizeId = 'mediana';
+        let selectedDoughId = 'tradicional';
+        let selectedSauceId = 'tomate';
+        let selectedCheeseId = 'mozzarella';
+        let selectedToppingIds = [];
+
+        // Cart State
+        let shoppingCart = [];
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('mixa_app_data');
+                return saved ? JSON.parse(saved) : JSON.parse(JSON.stringify(DEFAULT_STATE));
+            } catch (e) {
+                return JSON.parse(JSON.stringify(DEFAULT_STATE));
+            }
+        }
+
+        function saveState() {
+            localStorage.setItem('mixa_app_data', JSON.stringify(appData));
+        }
+
+        function resetDataToDefault() {
+            appData = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            saveState();
+            renderAll();
+            showToast('Datos restablecidos a la versión por defecto', 'info');
+        }
+
+        function renderBuilderControls() {
+            // Render Sizes
+            const sizeContainer = document.getElementById('size-options-container');
+            sizeContainer.innerHTML = appData.sizes.map(s => `
+                <button onclick="selectSize('${s.id}')" class="p-3 rounded-xl border text-left font-semibold text-xs transition ${selectedSizeId === s.id ? 'border-mixa-orange bg-mixa-orange/20 text-white' : 'border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700'}">
+                    <span class="block text-sm text-white">${s.name}</span>
+                    <span class="text-[10px] text-mixa-orange font-bold">$${s.basePrice.toLocaleString('es-AR')}</span>
+                </button>
+            `).join('');
+
+            // Render Doughs
+            const doughContainer = document.getElementById('dough-options-container');
+            doughContainer.innerHTML = appData.doughs.map(d => `
+                <button onclick="selectDough('${d.id}')" class="p-3 rounded-xl border text-left font-semibold text-xs transition ${selectedDoughId === d.id ? 'border-mixa-orange bg-mixa-orange/20 text-white' : 'border-slate-800 bg-slate-900 text-slate-300 hover:border-slate-700'}">
+                    <span class="block text-sm text-white">${d.name}</span>
+                    <span class="text-[10px] text-slate-400">${d.extraPrice > 0 ? '+$' + d.extraPrice.toLocaleString('es-AR') : 'Incluida'}</span>
+                </button>
+            `).join('');
+
+            // Render Sauces
+            const sauceSelect = document.getElementById('sauce-select');
+            sauceSelect.innerHTML = appData.sauces.map(s => `
+                <option value="${s.id}" ${selectedSauceId === s.id ? 'selected' : ''}>
+                    ${s.name} ${s.price > 0 ? '(+$' + s.price + ')' : ''}
+                </option>
+            `).join('');
+
+            // Render Cheeses
+            const cheeseSelect = document.getElementById('cheese-select');
+            cheeseSelect.innerHTML = appData.cheeses.map(c => `
+                <option value="${c.id}" ${selectedCheeseId === c.id ? 'selected' : ''}>
+                    ${c.name} ${c.price > 0 ? '(+$' + c.price + ')' : ''}
+                </option>
+            `).join('');
+
+            // Render Toppings Grid based on active category
+            renderToppingsSelector();
+            updatePizzaBuilder();
+        }
+
+        function switchToppingCategory(cat) {
+            currentToppingTab = cat;
+            document.getElementById('tab-eco').className = cat === 'Económico' ? 'pb-2 border-b-2 border-mixa-orange text-mixa-orange' : 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-white';
+            document.getElementById('tab-inter').className = cat === 'Intermedio' ? 'pb-2 border-b-2 border-mixa-orange text-mixa-orange' : 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-white';
+            document.getElementById('tab-prem').className = cat === 'Premium' ? 'pb-2 border-b-2 border-mixa-orange text-mixa-orange' : 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-white';
+            renderToppingsSelector();
+        }
+
+        function renderToppingsSelector() {
+            const grid = document.getElementById('toppings-selector-grid');
+            const filtered = appData.toppings.filter(t => t.category === currentToppingTab);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-2 text-center text-slate-500 text-xs py-8">No hay toppings cargados en esta categoría. Podés agregar más desde el Panel Admin.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(t => {
+                const isSelected = selectedToppingIds.includes(t.id);
+                return `
+                    <button onclick="toggleToppingSelection('${t.id}')" class="p-3 rounded-xl border text-left flex items-center justify-between transition ${isSelected ? 'border-mixa-orange bg-mixa-orange/20 text-white' : 'border-slate-800 bg-slate-900/60 text-slate-300 hover:border-slate-700'}">
+                        <div>
+                            <span class="block text-xs font-bold text-white">${t.name}</span>
+                            <span class="text-[10px] text-mixa-orange font-semibold">+$${t.price.toLocaleString('es-AR')}</span>
+                        </div>
+                        <i class="fa-solid ${isSelected ? 'fa-circle-check text-mixa-orange' : 'fa-plus text-slate-500'} text-sm"></i>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectSize(id) { selectedSizeId = id; renderBuilderControls(); }
+        function selectDough(id) { selectedDoughId = id; renderBuilderControls(); }
+
+        function toggleToppingSelection(id) {
+            if (selectedToppingIds.includes(id)) {
+                selectedToppingIds = selectedToppingIds.filter(item => item !== id);
+            } else {
+                selectedToppingIds.push(id);
+            }
+            renderToppingsSelector();
+            updatePizzaBuilder();
+        }
+
+        function updatePizzaBuilder() {
+            selectedSauceId = document.getElementById('sauce-select').value;
+            selectedCheeseId = document.getElementById('cheese-select').value;
+
+            // Calculate Price
+            const sizeObj = appData.sizes.find(s => s.id === selectedSizeId) || appData.sizes[1];
+            const doughObj = appData.doughs.find(d => d.id === selectedDoughId) || appData.doughs[0];
+            const sauceObj = appData.sauces.find(s => s.id === selectedSauceId) || appData.sauces[0];
+            const cheeseObj = appData.cheeses.find(c => c.id === selectedCheeseId) || appData.cheeses[0];
+
+            let toppingsTotal = 0;
+            const activeToppings = appData.toppings.filter(t => selectedToppingIds.includes(t.id));
+            activeToppings.forEach(t => toppingsTotal += t.price);
+
+            const totalPrice = sizeObj.basePrice + doughObj.extraPrice + sauceObj.price + cheeseObj.price + toppingsTotal;
+
+            // Update UI Summary Elements
+            document.getElementById('summary-size-dough').innerText = `${sizeObj.name} - ${doughObj.name}`;
+            document.getElementById('summary-base').innerText = `${sauceObj.name} + ${cheeseObj.name}`;
+            document.getElementById('summary-topping-count').innerText = activeToppings.length;
+            document.getElementById('summary-total-price').innerText = `$${totalPrice.toLocaleString('es-AR')}`;
+
+            // Update summary tags
+            const tagsContainer = document.getElementById('summary-toppings-tags');
+            if (activeToppings.length === 0) {
+                tagsContainer.innerHTML = `<span class="text-slate-500 italic">Ningún topping agregado</span>`;
+            } else {
+                tagsContainer.innerHTML = activeToppings.map(t => `
+                    <span class="bg-slate-800 text-mixa-orange text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 border border-slate-700">
+                        ${t.name}
+                        <i onclick="toggleToppingSelection('${t.id}')" class="fa-solid fa-xmark cursor-pointer hover:text-white"></i>
+                    </span>
+                `).join('');
+            }
+
+            // Visualizer update
+            const visualPlaceholder = document.getElementById('visual-toppings-placeholder');
+            if (activeToppings.length === 0) {
+                visualPlaceholder.innerHTML = 'Agregá Toppings';
+            } else {
+                visualPlaceholder.innerHTML = activeToppings.map(t => `<span class="bg-mixa-orange/90 text-white text-[9px] px-1.5 py-0.5 rounded shadow">${t.name}</span>`).join('');
+            }
+        }
+
+        function resetCustomBuilder() {
+            selectedSizeId = 'mediana';
+            selectedDoughId = 'tradicional';
+            selectedSauceId = 'tomate';
+            selectedCheeseId = 'mozzarella';
+            selectedToppingIds = [];
+            renderBuilderControls();
+            showToast('Creador de pizza reiniciado', 'info');
+        }
+
+        function renderFixedMenu() {
+            const grid = document.getElementById('fixed-menu-grid');
+            let items = appData.fixedMenu;
+
+            if (currentMenuFilter !== 'Todos') {
+                items = items.filter(m => m.category === currentMenuFilter);
+            }
+
+            grid.innerHTML = items.map(p => `
+                <div class="bg-mixa-card rounded-2xl overflow-hidden border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition duration-300 transform hover:-translate-y-1">
+                    <div>
+                        <div class="h-48 overflow-hidden relative">
+                            <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover">
+                            <span class="absolute top-3 right-3 bg-mixa-dark/80 backdrop-blur-sm text-mixa-yellow text-xs font-bold px-2.5 py-1 rounded-full border border-slate-700">
+                                ${p.category}
+                            </span>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xl font-bold text-white font-display">${p.name}</h3>
+                                <span class="text-lg font-extrabold text-mixa-orange font-display">$${p.price.toLocaleString('es-AR')}</span>
+                            </div>
+                            <p class="text-slate-400 text-xs leading-relaxed">${p.desc}</p>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <button onclick="addFixedPizzaToCart('${p.id}')" class="w-full bg-slate-800 hover:bg-mixa-orange text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cart-plus"></i> Agregar al Pedido
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterMenuCategory(cat) {
+            currentMenuFilter = cat;
+            const buttons = document.querySelectorAll('.menu-cat-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText.trim().toLowerCase() === cat.toLowerCase() || (cat === 'Todos' && btn.innerText.includes('Todas'))) {
+                    btn.className = 'menu-cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-mixa-orange text-white border border-mixa-orange transition';
+                } else {
+                    btn.className = 'menu-cat-btn px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700 transition';
+                }
+            });
+            renderFixedMenu();
+        }
+
+        function addCustomPizzaToCart() {
+            const sizeObj = appData.sizes.find(s => s.id === selectedSizeId) || appData.sizes[1];
+            const doughObj = appData.doughs.find(d => d.id === selectedDoughId) || appData.doughs[0];
+            const sauceObj = appData.sauces.find(s => s.id === selectedSauceId) || appData.sauces[0];
+            const cheeseObj = appData.cheeses.find(c => c.id === selectedCheeseId) || appData.cheeses[0];
+            const activeToppings = appData.toppings.filter(t => selectedToppingIds.includes(t.id));
+
+            let toppingsTotal = 0;
+            activeToppings.forEach(t => toppingsTotal += t.price);
+            const price = sizeObj.basePrice + doughObj.extraPrice + sauceObj.price + cheeseObj.price + toppingsTotal;
+
+            const cartItem = {
+                cartId: 'c_' + Date.now(),
+                title: `Pizza Personalizada (${sizeObj.name})`,
+                details: `Masa: ${doughObj.name} | ${sauceObj.name} + ${cheeseObj.name} | Toppings: ${activeToppings.map(t => t.name).join(', ') || 'Sin toppings extra'}`,
+                price: price
+            };
+
+            shoppingCart.push(cartItem);
+            updateCartUI();
+            showToast('Pizza personalizada agregada al pedido 🍕', 'success');
+        }
+
+        function addFixedPizzaToCart(pizzaId) {
+            const p = appData.fixedMenu.find(item => item.id === pizzaId);
+            if (!p) return;
+
+            const cartItem = {
+                cartId: 'c_' + Date.now(),
+                title: p.name,
+                details: p.desc,
+                price: p.price
+            };
+
+            shoppingCart.push(cartItem);
+            updateCartUI();
+            showToast(`${p.name} agregada al pedido!`, 'success');
+        }
+
+        function removeFromCart(cartId) {
+            shoppingCart = shoppingCart.filter(item => item.cartId !== cartId);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-badge').innerText = shoppingCart.length;
+            const container = document.getElementById('cart-items-container');
+
+            if (shoppingCart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 space-y-3 text-slate-500">
+                        <i class="fa-solid fa-basket-shopping text-4xl"></i>
+                        <p class="text-sm">Tu carrito está vacío.</p>
+                        <a href="#armar" onclick="toggleCartDrawer()" class="inline-block text-xs text-mixa-orange hover:underline font-semibold">¡Armá una pizza a tu gusto!</a>
+                    </div>
+                `;
+                document.getElementById('cart-total-price').innerText = '$0';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = shoppingCart.map(item => {
+                total += item.price;
+                return `
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2">
+                        <div class="flex items-start justify-between">
+                            <h4 class="font-bold text-white text-sm">${item.title}</h4>
+                            <button onclick="removeFromCart('${item.cartId}')" class="text-slate-500 hover:text-red-400 text-xs p-1">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 leading-snug">${item.details}</p>
+                        <div class="text-right font-extrabold text-mixa-orange text-sm">$${item.price.toLocaleString('es-AR')}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('cart-total-price').innerText = `$${total.toLocaleString('es-AR')}`;
+        }
+
+        function sendWhatsAppOrder() {
+            if (shoppingCart.length === 0) {
+                showToast('Agregá al menos un producto antes de enviar tu pedido', 'error');
+                return;
+            }
+
+            const name = document.getElementById('order-name').value.trim() || 'Cliente';
+            const type = document.getElementById('order-type').value;
+            const payment = document.getElementById('order-payment').value;
+            const address = document.getElementById('order-address').value.trim() || 'A coordinar';
+
+            let msg = `*NUEVO PEDIDO MIXA - Coronel Suárez*%0A`;
+            msg += `----------------------------------%0A`;
+            msg += `*Cliente:* ${name}%0A`;
+            msg += `*Modalidad:* ${type}%0A`;
+            msg += `*Dirección:* ${address}%0A`;
+            msg += `*Forma de Pago:* ${payment}%0A`;
+            msg += `----------------------------------%0A`;
+            msg += `*DETALLE DEL PEDIDO:*%0A`;
+
+            let total = 0;
+            shoppingCart.forEach((item, index) => {
+                total += item.price;
+                msg += `%0A*${index + 1}. ${item.title}* - $${item.price.toLocaleString('es-AR')}%0A`;
+                msg += `_${item.details}_%0A`;
+            });
+
+            msg += `%0A----------------------------------%0A`;
+            msg += `*TOTAL A PAGAR: $${total.toLocaleString('es-AR')}*`;
+
+            const phone = "5492926000000"; // Número referencial de MIXA Coronel Suárez
+            window.open(`https://wa.me/${phone}?text=${msg}`, '_blank');
+        }
+
+        function renderAdminTables() {
+            // Render Toppings Table
+            const toppingBody = document.getElementById('admin-toppings-table-body');
+            toppingBody.innerHTML = appData.toppings.map(t => `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-semibold text-white">${t.name}</td>
+                    <td class="p-3"><span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">${t.category}</span></td>
+                    <td class="p-3 text-mixa-orange font-bold">$${t.price.toLocaleString('es-AR')}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deleteTopping('${t.id}')" class="text-slate-500 hover:text-red-400 text-xs">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Render Fixed Menu Table
+            const menuBody = document.getElementById('admin-menu-table-body');
+            menuBody.innerHTML = appData.fixedMenu.map(p => `
+                <tr class="hover:bg-slate-900/50">
+                    <td class="p-3 font-semibold text-white">${p.name}</td>
+                    <td class="p-3"><span class="bg-slate-800 text-slate-300 text-[10px] px-2 py-0.5 rounded">${p.category}</span></td>
+                    <td class="p-3 text-mixa-orange font-bold">$${p.price.toLocaleString('es-AR')}</td>
+                    <td class="p-3 text-right">
+                        <button onclick="deletePizzaMenu('${p.id}')" class="text-slate-500 hover:text-red-400 text-xs">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function handleAddOrEditTopping(e) {
+            e.preventDefault();
+            const name = document.getElementById('topping-input-name').value.trim();
+            const price = parseInt(document.getElementById('topping-input-price').value) || 0;
+            const category = document.getElementById('topping-input-category').value;
+
+            if (!name) return;
+
+            const newTopping = {
+                id: 'top_' + Date.now(),
+                name: name,
+                price: price,
+                category: category
+            };
+
+            appData.toppings.push(newTopping);
+            saveState();
+            renderAll();
+            
+            // Reset form inputs
+            document.getElementById('topping-input-name').value = '';
+            document.getElementById('topping-input-price').value = '';
+            showToast(`Topping "${name}" agregado correctamente`, 'success');
+        }
+
+        function deleteTopping(id) {
+            appData.toppings = appData.toppings.filter(t => t.id !== id);
+            selectedToppingIds = selectedToppingIds.filter(tId => tId !== id);
+            saveState();
+            renderAll();
+            showToast('Topping eliminado', 'info');
+        }
+
+        function handleAddOrEditPizza(e) {
+            e.preventDefault();
+            const name = document.getElementById('pizza-input-name').value.trim();
+            const price = parseInt(document.getElementById('pizza-input-price').value) || 0;
+            const category = document.getElementById('pizza-input-category').value;
+            const desc = document.getElementById('pizza-input-desc').value.trim();
+
+            if (!name) return;
+
+            const newPizza = {
+                id: 'pm_' + Date.now(),
+                name: name,
+                category: category,
+                desc: desc,
+                price: price,
+                image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80'
+            };
+
+            appData.fixedMenu.push(newPizza);
+            saveState();
+            renderAll();
+
+            // Reset form
+            document.getElementById('pizza-input-name').value = '';
+            document.getElementById('pizza-input-price').value = '';
+            document.getElementById('pizza-input-desc').value = '';
+            showToast(`Pizza "${name}" agregada a la carta`, 'success');
+        }
+
+        function deletePizzaMenu(id) {
+            appData.fixedMenu = appData.fixedMenu.filter(p => p.id !== id);
+            saveState();
+            renderAll();
+            showToast('Pizza eliminada de la carta', 'info');
+        }
+
+        function switchAdminTab(tab) {
+            const secToppings = document.getElementById('admin-sec-toppings');
+            const secMenu = document.getElementById('admin-sec-menu');
+            const tabToppings = document.getElementById('admin-tab-toppings');
+            const tabMenu = document.getElementById('admin-tab-menu');
+
+            if (tab === 'toppings') {
+                secToppings.classList.remove('hidden');
+                secMenu.classList.add('hidden');
+                tabToppings.className = 'pb-3 border-b-2 border-mixa-orange text-mixa-orange';
+                tabMenu.className = 'pb-3 border-b-2 border-transparent text-slate-400 hover:text-white';
+            } else {
+                secToppings.classList.add('hidden');
+                secMenu.classList.remove('hidden');
+                tabToppings.className = 'pb-3 border-b-2 border-transparent text-slate-400 hover:text-white';
+                tabMenu.className = 'pb-3 border-b-2 border-mixa-orange text-mixa-orange';
+            }
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cart-drawer');
+            drawer.classList.toggle('hidden');
+        }
+
+        function toggleAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let colorClass = 'bg-slate-800 border-slate-700 text-white';
+            if (type === 'success') colorClass = 'bg-emerald-950 border-emerald-800 text-emerald-200';
+            if (type === 'error') colorClass = 'bg-red-950 border-red-800 text-red-200';
+
+            toast.className = `p-3.5 rounded-xl border text-xs font-semibold shadow-xl flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 ${colorClass}`;
+            toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> ${message}`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function renderAll() {
+            renderBuilderControls();
+            renderFixedMenu();
+            renderAdminTables();
+            updateCartUI();
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            renderAll();
+        };
+    </script>
+</body>
+</html>
